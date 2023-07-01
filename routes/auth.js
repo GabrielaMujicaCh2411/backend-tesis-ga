@@ -21,15 +21,15 @@ router.post("/register", async (req, res) => {
     // Paso 1: Registrar el cliente en T_Cliente
     const clienteQuery = `
     DECLARE @IDCliente INT;
-    INSERT INTO T_Cliente (dni, nombres, apellidos, celular, correo)
+    INSERT INTO T_Cliente (nombres, apellidos, celular, correo)
     OUTPUT inserted.id_cliente
-    VALUES ('${dni}', '${nombres}', '${apellidos}', '${celular}', '${correo}');
+    VALUES ('${nombres}', '${apellidos}', '${celular}', '${correo}');
     SELECT @IDCliente AS IDCliente;`;
     const result = await pool.request().query(clienteQuery);
     const idCliente = result.recordset[0].id_cliente;
     console.log("ID de creación:", idCliente);
 
-    const registrarUsuarioQuery = `INSERT INTO T_Usuario (dniUsuario, password, id_rol, id_cliente) 
+    const registrarUsuarioQuery = `INSERT INTO T_Usuario (dniusuario, contraseña, id_rol, id_cliente) 
     VALUES ('${dni}', '${password}', 1, ${idCliente})`;
     await pool.request().query(registrarUsuarioQuery);
 
@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
   try {
     const pool = await getConnection.getConnection();
     // Consultar el usuario por DNI y contraseña
-    const consultaUsuarioQuery = `SELECT * FROM T_Usuario WHERE dniUsuario = '${dni}' AND password = '${password}'`;
+    const consultaUsuarioQuery = `SELECT * FROM T_Usuario WHERE dniUsuario = '${dni}' AND contraseña = '${password}'`;
     const usuariosResult = await pool.request().query(consultaUsuarioQuery);
     const usuarios = usuariosResult.recordset;
 

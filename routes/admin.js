@@ -181,14 +181,15 @@ router.post("/registrar-unidad", async (req, res) => {
       id_tipounidad,
       id_estadounidad,
       imagenes,
+      precio,
     } = req.body;
 
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
     // Insertar la nueva unidad en la tabla T_Unidad
-    const registrarUnidadQuery = `INSERT INTO T_Unidad (serie, nombres, modelo, marca, cantidad, descripcion, caracteristicas1, caracteristicas2, caracteristicas3, id_tipounidad, id_estadounidad, imagenes) 
-        VALUES ('${serie}', '${nombres}', '${modelo}', '${marca}', ${cantidad}, '${descripcion}', '${caracteristica1}', '${caracteristica2}', '${caracteristica3}', ${id_tipounidad}, ${id_estadounidad}, '${imagenes}')`;
+    const registrarUnidadQuery = `INSERT INTO T_Unidad (serie, nombres, modelo, marca, cantidad, descripcion, caracteristicas1, caracteristicas2, caracteristicas3, id_tipounidad, id_estadounidad, imagenes, precio) 
+        VALUES ('${serie}', '${nombres}', '${modelo}', '${marca}', ${cantidad}, '${descripcion}', '${caracteristica1}', '${caracteristica2}', '${caracteristica3}', ${id_tipounidad}, ${id_estadounidad}, '${imagenes}', ${precio})`;
     await pool.request().query(registrarUnidadQuery);
 
     res.status(201).json({ message: "Unidad registrada exitosamente" });
