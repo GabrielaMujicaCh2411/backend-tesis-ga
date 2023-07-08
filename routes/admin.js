@@ -128,6 +128,24 @@ router.get("/roles", async (req, res) => {
   }
 });
 
+router.get("/tipo-trabajador", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los roles en la tabla T_Rol
+    const obtenerRolesQuery = "SELECT * FROM T_TipoTrabajador";
+    const result = await pool.request().query(obtenerRolesQuery);
+
+    // Enviar los datos de los roles como respuesta en formato JSON
+    const roles = result.recordset;
+    res.status(200).json(roles);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los roles" });
+  }
+});
+
 router.get("/estados-trabajador", async (req, res) => {
   try {
     // Obtener la conexión a la base de datos
