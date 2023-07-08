@@ -484,5 +484,35 @@ router.get("/obras", async (req, res) => {
   }
 });
 
+// Ruta para insertar un nuevo pedido
+router.post("/insertar-pedido", async (req, res) => {
+  try {
+    const {
+      fechaInicio,
+      obra,
+      empresa,
+      ubicacion,
+      fechaEntrega,
+      precioPedido,
+      id_estadopedido,
+      id_trabajador,
+      id_usuario,
+      canthoras,
+    } = req.body;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Insertar el nuevo pedido en la tabla T_Pedido
+    const query = `INSERT INTO T_Pedido (fechaInicio, obra, empresa, ubicacion, fechaEntrega, precioPedido, id_estadopedido, id_trabajador, id_usuario, canthoras)
+                   VALUES ('${fechaInicio}', '${obra}', '${empresa}', '${ubicacion}', '${fechaEntrega}', ${precioPedido}, ${id_estadopedido}, ${id_trabajador}, ${id_usuario}, ${canthoras})`;
+    await pool.request().query(query);
+
+    res.status(201).json({ message: "Pedido creado exitosamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al crear el pedido" });
+  }
+});
 
 module.exports = router;

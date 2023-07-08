@@ -60,7 +60,9 @@ router.post("/login", async (req, res) => {
       const usuario = usuarios[0];
 
       // Usuario válido, se puede generar un token de autenticación o realizar otras acciones
-      res.status(200).json({ message: "Credenciales válidas" });
+      res
+        .status(200)
+        .json({ message: "Credenciales válidas", userData: usuario });
     } else {
       // Usuario no encontrado o credenciales incorrectas
       res.status(401).json({ message: "Credenciales inválidas" });
