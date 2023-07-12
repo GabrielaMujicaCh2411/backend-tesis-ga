@@ -8,8 +8,13 @@ router.get("/trabajadores", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar todos los datos de T_Trabajador
-    const query = "SELECT * FROM T_Trabajador";
+    // Consultar todos los datos de T_Trabajador con JOIN en las tablas relacionadas
+    const query = `
+      SELECT TT.id_tipotrabajador, TT.nombretipotrabajador, ET.nombreestadotrabajador AS estado_trabajador, T.*
+      FROM T_Trabajador T
+      INNER JOIN T_TipoTrabajador TT ON T.id_tipotrabajador = TT.id_tipotrabajador
+      INNER JOIN T_EstadoTrabajador ET ON T.id_estadotrabajador = ET.id_estadotrabajador
+    `;
     const result = await pool.request().query(query);
 
     // Enviar los datos como respuesta en formato JSON
@@ -30,8 +35,14 @@ router.get("/trabajador/:id", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar el trabajador por ID en la tabla T_Trabajador
-    const query = `SELECT * FROM T_Trabajador WHERE id_trabajador = ${idTrabajador}`;
+    // Consultar el trabajador por ID en la tabla T_Trabajador con JOIN en las tablas relacionadas
+    const query = `
+      SELECT TT.nombretipotrabajador, ET.nombreestadotrabajador AS estado_trabajador, T.*
+      FROM T_Trabajador T
+      INNER JOIN T_TipoTrabajador TT ON T.id_tipotrabajador = TT.id_tipotrabajador
+      INNER JOIN T_EstadoTrabajador ET ON T.id_estadotrabajador = ET.id_estadotrabajador
+      WHERE T.id_trabajador = ${idTrabajador}
+    `;
     const result = await pool.request().query(query);
 
     // Verificar si se encontró un trabajador con el ID especificado
@@ -172,8 +183,13 @@ router.get("/unidades", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar todos los datos de T_Trabajador
-    const query = "SELECT * FROM T_Unidad";
+    // Consultar todos los datos de T_Unidad con JOIN en las tablas relacionadas
+    const query = `
+      SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*
+      FROM T_Unidad U
+      INNER JOIN T_TipoUnidad TU ON U.id_tipounidad = TU.id_tipounidad
+      INNER JOIN T_EstadoUnidad EU ON U.id_estadounidad = EU.id_estadounidad
+    `;
     const result = await pool.request().query(query);
 
     // Enviar los datos como respuesta en formato JSON
@@ -274,8 +290,14 @@ router.get("/unidad/:id", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar los datos de la unidad en la tabla T_Unidad
-    const obtenerUnidadQuery = `SELECT * FROM T_Unidad WHERE id_unidad = ${unidadId}`;
+    // Consultar los datos de la unidad en la tabla T_Unidad con JOIN en las tablas relacionadas
+    const obtenerUnidadQuery = `
+      SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*
+      FROM T_Unidad U
+      INNER JOIN T_TipoUnidad TU ON U.id_tipounidad = TU.id_tipounidad
+      INNER JOIN T_EstadoUnidad EU ON U.id_estadounidad = EU.id_estadounidad
+      WHERE U.id_unidad = ${unidadId}
+    `;
     const result = await pool.request().query(obtenerUnidadQuery);
 
     // Verificar si se encontró la unidad
@@ -357,15 +379,20 @@ router.post("/registrar-partida", async (req, res) => {
 });
 
 // Ruta para obtener las partidas por ID del tipo de partida
-router.get("/partidas/:idTipoPartida", async (req, res) => {
+router.get("/get-partidas/:idTipoPartida", async (req, res) => {
   try {
     const idTipoPartida = req.params.idTipoPartida;
 
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar las partidas según el ID del tipo de partida
-    const obtenerPartidasQuery = `SELECT * FROM T_Partida WHERE id_tipopartida = ${idTipoPartida}`;
+    // Consultar las partidas según el ID del tipo de partida con JOIN en la tabla relacionada
+    const obtenerPartidasQuery = `
+      SELECT TP.nombretipopartida, P.*
+      FROM T_Partida P
+      INNER JOIN T_TipoPartida TP ON P.id_tipopartida = TP.id_tipopartida
+      WHERE P.id_tipopartida = ${idTipoPartida}
+    `;
     const result = await pool.request().query(obtenerPartidasQuery);
 
     res.status(200).json(result.recordset);
@@ -376,7 +403,7 @@ router.get("/partidas/:idTipoPartida", async (req, res) => {
 });
 
 // Ruta para editar una partida específica
-router.put("/partidas/:idPartida", async (req, res) => {
+router.put("/edit-partidas/:idPartida", async (req, res) => {
   try {
     const idPartida = req.params.idPartida;
     const {
@@ -409,8 +436,13 @@ router.get("/partidas/:idPartida", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar los datos de la partida en la tabla T_Partida
-    const obtenerPartidaQuery = `SELECT * FROM T_Partida WHERE id_partida = ${idPartida}`;
+    // Consultar los datos de la partida en la tabla T_Partida con JOIN en la tabla relacionada
+    const obtenerPartidaQuery = `
+      SELECT TP.nombretipopartida, P.*
+      FROM T_Partida P
+      INNER JOIN T_TipoPartida TP ON P.id_tipopartida = TP.id_tipopartida
+      WHERE P.id_partida = ${idPartida}
+    `;
     const result = await pool.request().query(obtenerPartidaQuery);
 
     // Verificar si se encontraron datos
@@ -490,8 +522,12 @@ router.get("/obras", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Consultar todas las obras de la tabla T_Obra
-    const query = "SELECT * FROM T_Obra";
+    // Consultar todas las obras de la tabla T_Obra con JOIN en la tabla relacionada
+    const query = `
+      SELECT EO.nombreestadoobra, O.*
+      FROM T_Obra O
+      INNER JOIN T_EstadoObra EO ON O.id_estadoobra = EO.id_estadoobra
+    `;
     const result = await pool.request().query(query);
 
     // Enviar los datos como respuesta en formato JSON
@@ -499,6 +535,38 @@ router.get("/obras", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error al obtener las obras" });
+  }
+});
+
+// RUTA PARA OBTENER OSLO 1 OBRA
+router.get("/obra/:id", async (req, res) => {
+  try {
+    const idObra = req.params.id;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los datos de la obra por ID en la tabla T_Obra con JOIN en la tabla relacionada
+    const query = `
+      SELECT EO.nombreestadoobra, O.*
+      FROM T_Obra O
+      INNER JOIN T_EstadoObra EO ON O.id_estadoobra = EO.id_estadoobra
+      WHERE O.id_obra = ${idObra}
+    `;
+    const result = await pool.request().query(query);
+
+    // Verificar si se encontraron datos
+    if (result.recordset.length > 0) {
+      // Obra encontrada, enviar los datos como respuesta en formato JSON
+      const obra = result.recordset[0];
+      res.status(200).json(obra);
+    } else {
+      // Obra no encontrada
+      res.status(404).json({ message: "Obra no encontrada" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los datos de la obra" });
   }
 });
 

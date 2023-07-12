@@ -50,8 +50,15 @@ router.post("/login", async (req, res) => {
 
   try {
     const pool = await getConnection.getConnection();
-    // Consultar el usuario por DNI y contraseña
-    const consultaUsuarioQuery = `SELECT * FROM T_Usuario WHERE dniUsuario = '${dni}' AND contraseña = '${password}'`;
+
+    // Consultar el usuario por DNI y contraseña con JOIN en las tablas relacionadas
+    const consultaUsuarioQuery = `
+      SELECT U.*, C.nombres, C.apellidos, C.celular, C.correo, R.nombreRol, R.descripcionRol
+      FROM T_Usuario U
+      INNER JOIN T_Cliente C ON U.id_cliente = C.id_cliente
+      INNER JOIN T_Rol R ON U.id_rol = R.id_rol
+      WHERE U.dniUsuario = '${dni}' AND U.contraseña = '${password}'
+    `;
     const usuariosResult = await pool.request().query(consultaUsuarioQuery);
     const usuarios = usuariosResult.recordset;
 
@@ -68,8 +75,8 @@ router.post("/login", async (req, res) => {
       res.status(401).json({ message: "Credenciales inválidas" });
     }
   } catch (error) {
-    console.error("Error al realizar el inicio de sesion:", error);
-    res.status(500).send("Error al realizar el inicio de sesion");
+    console.error("Error al realizar el inicio de sesión:", error);
+    res.status(500).send("Error al realizar el inicio de sesión");
   }
 });
 
