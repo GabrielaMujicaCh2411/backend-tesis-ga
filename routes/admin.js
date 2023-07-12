@@ -601,4 +601,377 @@ router.post("/insertar-pedido", async (req, res) => {
   }
 });
 
+router.get("/citas", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar todos los datos de la tabla T_Cita
+    const query = "SELECT * FROM T_Cita";
+    const result = await pool.request().query(query);
+
+    // Enviar los datos como respuesta en formato JSON
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener las citas" });
+  }
+});
+
+router.post("/set-cita", async (req, res) => {
+  const { fechaCita, horaCita, idUsuario } = req.body;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Insertar la nueva cita en la tabla T_Cita
+    const insertarCitaQuery = `
+      INSERT INTO T_Cita (fechaCita, horaCita, id_usuario)
+      VALUES ('${fechaCita}', '${horaCita}', ${idUsuario})
+    `;
+    await pool.request().query(insertarCitaQuery);
+
+    res.status(200).json({ message: "Cita insertada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al insertar la cita" });
+  }
+});
+
+router.delete("/delete-cita/:id", async (req, res) => {
+  const idCita = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Borrar la cita de la tabla T_Cita según el id especificado
+    const borrarCitaQuery = `DELETE FROM T_Cita WHERE id_cita = ${idCita}`;
+    await pool.request().query(borrarCitaQuery);
+
+    res.status(200).json({ message: "Cita borrada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al borrar la cita" });
+  }
+});
+
+router.get("/cita/:id", async (req, res) => {
+  const idCita = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los datos de la cita según el id especificado
+    const obtenerCitaQuery = `SELECT * FROM T_Cita WHERE id_cita = ${idCita}`;
+    const result = await pool.request().query(obtenerCitaQuery);
+
+    // Verificar si se encontró una cita con el id especificado
+    if (result.recordset.length > 0) {
+      // Cita encontrada, enviar los datos como respuesta en formato JSON
+      const cita = result.recordset[0];
+      res.status(200).json(cita);
+    } else {
+      // Cita no encontrada
+      res.status(404).json({ message: "Cita no encontrada" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los datos de la cita" });
+  }
+});
+
+router.put("/edit-cita/:id", async (req, res) => {
+  const idCita = req.params.id;
+  const { fechaCita, horaCita, idUsuario } = req.body;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Actualizar los datos de la cita en la tabla T_Cita según el id especificado
+    const actualizarCitaQuery = `
+      UPDATE T_Cita
+      SET fechaCita = '${fechaCita}', horaCita = '${horaCita}', id_usuario = ${idUsuario}
+      WHERE id_cita = ${idCita}
+    `;
+    await pool.request().query(actualizarCitaQuery);
+
+    res.status(200).json({ message: "Cita actualizada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al actualizar la cita" });
+  }
+});
+
+router.get("/cotizaciones", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar todos los datos de la tabla T_Cotizacion
+    const query = "SELECT * FROM T_Cotizacion";
+    const result = await pool.request().query(query);
+
+    // Enviar los datos como respuesta en formato JSON
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener las cotizaciones" });
+  }
+});
+
+router.post("/new-cotizacion", async (req, res) => {
+  const { fecha, total, idObra } = req.body;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Insertar la nueva cotización en la tabla T_Cotizacion
+    const insertarCotizacionQuery = `
+      INSERT INTO T_Cotizacion (fecha, total, id_obra)
+      VALUES ('${fecha}', ${total}, ${idObra})
+    `;
+    await pool.request().query(insertarCotizacionQuery);
+
+    res.status(200).json({ message: "Cotización insertada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al insertar la cotización" });
+  }
+});
+
+router.delete("/delete-cotizacion/:id", async (req, res) => {
+  const idCotizacion = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Borrar la cotización de la tabla T_Cotizacion según el id especificado
+    const borrarCotizacionQuery = `DELETE FROM T_Cotizacion WHERE id_cotizacion = ${idCotizacion}`;
+    await pool.request().query(borrarCotizacionQuery);
+
+    res.status(200).json({ message: "Cotización borrada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al borrar la cotización" });
+  }
+});
+
+router.get("/cotizacion/:id", async (req, res) => {
+  const idCotizacion = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los datos de la cotización según el id especificado
+    const obtenerCotizacionQuery = `SELECT * FROM T_Cotizacion WHERE id_cotizacion = ${idCotizacion}`;
+    const result = await pool.request().query(obtenerCotizacionQuery);
+
+    // Verificar si se encontró una cotización con el id especificado
+    if (result.recordset.length > 0) {
+      // Cotización encontrada, enviar los datos como respuesta en formato JSON
+      const cotizacion = result.recordset[0];
+      res.status(200).json(cotizacion);
+    } else {
+      // Cotización no encontrada
+      res.status(404).json({ message: "Cotización no encontrada" });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener los datos de la cotización" });
+  }
+});
+
+router.put("/edit-cotizacion/:id", async (req, res) => {
+  const idCotizacion = req.params.id;
+  const { fecha, total, idObra } = req.body;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Actualizar los datos de la cotización en la tabla T_Cotizacion según el id especificado
+    const actualizarCotizacionQuery = `
+      UPDATE T_Cotizacion
+      SET fecha = '${fecha}', total = ${total}, id_obra = ${idObra}
+      WHERE id_cotizacion = ${idCotizacion}
+    `;
+    await pool.request().query(actualizarCotizacionQuery);
+
+    res.status(200).json({ message: "Cotización actualizada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al actualizar la cotización" });
+  }
+});
+
+router.get("/facturas", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar todos los datos de la tabla T_Factura con JOIN en las tablas relacionadas
+    const query = `
+      SELECT F.id_factura, F.imagenes, C.fecha, C.total, O.id_obra, O.empresa, O.direccion, O.nombreObra, O.imagenes, O.fechaInicio, O.duracionObra, E.id_estadoobra, E.nombreestadoobra, E.descripcionestadoobra
+      FROM T_Factura F
+      INNER JOIN T_Cotizacion C ON F.id_cotizacion = C.id_cotizacion
+      INNER JOIN T_Obra O ON C.id_obra = O.id_obra
+      INNER JOIN T_EstadoObra E ON O.id_estadoobra = E.id_estadoobra
+    `;
+    const result = await pool.request().query(query);
+
+    // Enviar los datos como respuesta en formato JSON
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener las facturas" });
+  }
+});
+
+router.get("/factura/:id", async (req, res) => {
+  const idFactura = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los datos de la factura según el id especificado con JOIN en las tablas relacionadas
+    const obtenerFacturaQuery = `
+      SELECT F.id_factura, F.imagenes, C.fecha, C.total, O.id_obra, O.empresa, O.direccion, O.nombreObra, O.imagenes, O.fechaInicio, O.duracionObra, E.id_estadoobra, E.nombreestadoobra, E.descripcionestadoobra
+      FROM T_Factura F
+      INNER JOIN T_Cotizacion C ON F.id_cotizacion = C.id_cotizacion
+      INNER JOIN T_Obra O ON C.id_obra = O.id_obra
+      INNER JOIN T_EstadoObra E ON O.id_estadoobra = E.id_estadoobra
+      WHERE F.id_factura = ${idFactura}
+    `;
+    const result = await pool.request().query(obtenerFacturaQuery);
+
+    // Verificar si se encontró una factura con el id especificado
+    if (result.recordset.length > 0) {
+      // Factura encontrada, enviar los datos como respuesta en formato JSON
+      const factura = result.recordset[0];
+      res.status(200).json(factura);
+    } else {
+      // Factura no encontrada
+      res.status(404).json({ message: "Factura no encontrada" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los datos de la factura" });
+  }
+});
+
+router.post("/facturas", async (req, res) => {
+  try {
+    const { imagen, fecha, total, id_obra } = req.body;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Insertar una nueva factura en la tabla T_Factura
+    const insertarFacturaQuery = `
+      INSERT INTO T_Factura (imagenes, id_cotizacion)
+      VALUES ('${imagen}', (SELECT id_cotizacion FROM T_Cotizacion WHERE id_obra = ${id_obra}))
+    `;
+    await pool.request().query(insertarFacturaQuery);
+
+    // Obtener la factura recién insertada
+    const obtenerFacturaQuery = `
+      SELECT F.id_factura, F.imagenes, C.fecha, C.total, O.id_obra, O.empresa, O.direccion, O.nombreObra, O.imagenes, O.fechaInicio, O.duracionObra, E.id_estadoobra, E.nombreestadoobra, E.descripcionestadoobra
+      FROM T_Factura F
+      INNER JOIN T_Cotizacion C ON F.id_cotizacion = C.id_cotizacion
+      INNER JOIN T_Obra O ON C.id_obra = O.id_obra
+      INNER JOIN T_EstadoObra E ON O.id_estadoobra = E.id_estadoobra
+      WHERE F.id_factura = SCOPE_IDENTITY()
+    `;
+    const result = await pool.request().query(obtenerFacturaQuery);
+
+    // Verificar si se obtuvieron los datos de la factura insertada
+    if (result.recordset.length > 0) {
+      // Enviar los datos de la factura como respuesta en formato JSON
+      const factura = result.recordset[0];
+      res.status(200).json(factura);
+    } else {
+      res
+        .status(500)
+        .json({ error: "Error al obtener los datos de la factura insertada" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al insertar la factura" });
+  }
+});
+
+router.put("/facturas/:id", async (req, res) => {
+  const idFactura = req.params.id;
+  const { imagen, fecha, total, id_obra } = req.body;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Actualizar los datos de la factura en la tabla T_Factura
+    const editarFacturaQuery = `
+      UPDATE T_Factura
+      SET imagenes = '${imagen}'
+      WHERE id_factura = ${idFactura}
+    `;
+    await pool.request().query(editarFacturaQuery);
+
+    // Obtener los datos actualizados de la factura
+    const obtenerFacturaQuery = `
+      SELECT F.id_factura, F.imagenes, C.fecha, C.total, O.id_obra, O.empresa, O.direccion, O.nombreObra, O.imagenes, O.fechaInicio, O.duracionObra, E.id_estadoobra, E.nombreestadoobra, E.descripcionestadoobra
+      FROM T_Factura F
+      INNER JOIN T_Cotizacion C ON F.id_cotizacion = C.id_cotizacion
+      INNER JOIN T_Obra O ON C.id_obra = O.id_obra
+      INNER JOIN T_EstadoObra E ON O.id_estadoobra = E.id_estadoobra
+      WHERE F.id_factura = ${idFactura}
+    `;
+    const result = await pool.request().query(obtenerFacturaQuery);
+
+    // Verificar si se obtuvieron los datos actualizados de la factura
+    if (result.recordset.length > 0) {
+      // Enviar los datos actualizados de la factura como respuesta en formato JSON
+      const factura = result.recordset[0];
+      res.status(200).json(factura);
+    } else {
+      res.status(500).json({
+        error: "Error al obtener los datos actualizados de la factura",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al editar la factura" });
+  }
+});
+
+router.delete("/facturas/:id", async (req, res) => {
+  const idFactura = req.params.id;
+
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Eliminar la factura de la tabla T_Factura
+    const eliminarFacturaQuery = `
+      DELETE FROM T_Factura
+      WHERE id_factura = ${idFactura}
+    `;
+    await pool.request().query(eliminarFacturaQuery);
+
+    res.status(200).json({ message: "Factura eliminada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al eliminar la factura" });
+  }
+});
+
 module.exports = router;
