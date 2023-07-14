@@ -570,6 +570,27 @@ router.get("/obra/:id", async (req, res) => {
   }
 });
 
+router.get("/pedidos", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar todos los datos de la tabla T_Pedido con JOIN en la tabla T_EstadoPedido
+    const query = `
+      SELECT P.*, EP.nombreEstadopedido
+      FROM T_Pedido P
+      INNER JOIN T_EstadoPedido EP ON P.id_estadopedido = EP.id_estadopedido
+    `;
+    const result = await pool.request().query(query);
+
+    // Enviar los datos como respuesta en formato JSON
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los pedidos" });
+  }
+});
+
 // Ruta para insertar un nuevo pedido
 router.post("/insertar-pedido", async (req, res) => {
   try {
