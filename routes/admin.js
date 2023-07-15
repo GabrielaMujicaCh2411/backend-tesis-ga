@@ -542,6 +542,30 @@ router.get("/tipos-partidas", async (req, res) => {
   }
 });
 
+router.get("/estado-pedidos", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar todos los tipos de pedidos en la tabla T_EstadoPedido
+    const obtenerTiposPedidosQuery = "SELECT * FROM T_EstadoPedido";
+    const result = await pool.request().query(obtenerTiposPedidosQuery);
+
+    // Verificar si se encontraron datos
+    if (result.recordset.length > 0) {
+      // Tipos de pedidos encontrados, enviar los datos como respuesta en formato JSON
+      const tiposPedidos = result.recordset;
+      res.status(200).json(tiposPedidos);
+    } else {
+      // No se encontraron tipos de pedidos
+      res.status(404).json({ message: "No se encontraron tipos de pedidos" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los tipos de pedidos" });
+  }
+});
+
 // Ruta para eliminar una partida
 router.delete("/partidas/:idPartida", async (req, res) => {
   try {
