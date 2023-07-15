@@ -694,6 +694,38 @@ router.get("/pedidos", async (req, res) => {
   }
 });
 
+router.get("/pedido/:id", async (req, res) => {
+  try {
+    const idPedido = req.params.id;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los datos del pedido por ID en la tabla T_Pedido con JOIN en las tablas relacionadas
+    const query = `
+      SELECT EP.nombreestadopedido, P.*
+      FROM T_Pedido P
+      INNER JOIN T_EstadoPedido EP ON P.id_estadopedido = EP.id_estadopedido
+      WHERE P.id_pedido = ${idPedido}
+    `;
+    const result = await pool.request().query(query);
+
+    // Verificar si se encontraron datos
+    if (result.recordset.length > 0) {
+      // Pedido encontrado, enviar los datos como respuesta en formato JSON
+      const pedido = result.recordset[0];
+      res.status(200).json(pedido);
+    } else {
+      // Pedido no encontrado
+      res.status(404).json({ message: "Pedido no encontrado" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener los datos del pedido" });
+  }
+});
+
+
 // Ruta para insertar un nuevo pedido
 router.post("/insertar-pedido", async (req, res) => {
   try {
