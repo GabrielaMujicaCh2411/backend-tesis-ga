@@ -566,6 +566,28 @@ router.get("/estado-pedidos", async (req, res) => {
   }
 });
 
+router.put("/editar-estado-pedido/:idPedido", async (req, res) => {
+  try {
+    const idPedido = req.params.idPedido;
+    const { idEstadoPedido } = req.body;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Actualizar el estado del pedido en la tabla T_Pedido
+    const editarEstadoPedidoQuery = `
+      UPDATE T_Pedido
+      SET id_estadopedido = ${idEstadoPedido}
+      WHERE id_pedido = ${idPedido}`;
+    await pool.request().query(editarEstadoPedidoQuery);
+
+    res.status(200).json({ message: "Estado del pedido actualizado exitosamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al actualizar el estado del pedido" });
+  }
+});
+
 // Ruta para eliminar una partida
 router.delete("/partidas/:idPartida", async (req, res) => {
   try {
