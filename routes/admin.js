@@ -178,18 +178,49 @@ router.get("/estados-trabajador", async (req, res) => {
 });
 
 // Ruta para obtener todos los datos
+// router.get("/unidades", async (req, res) => {
+//   try {
+//     // Obtener la conexión a la base de datos
+//     const pool = await getConnection.getConnection();
+
+//     // Consultar todos los datos de T_Unidad con JOIN en las tablas relacionadas
+//     const query = `
+//       SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*
+//       FROM T_Unidad U
+//       INNER JOIN T_TipoUnidad TU ON U.id_tipounidad = TU.id_tipounidad
+//       INNER JOIN T_EstadoUnidad EU ON U.id_estadounidad = EU.id_estadounidad
+//     `;
+//     const result = await pool.request().query(query);
+
+//     // Enviar los datos como respuesta en formato JSON
+//     res.status(200).json(result.recordset);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Error al obtener los datos de T_Unidades" });
+//   }
+// });
+
 router.get("/unidades", async (req, res) => {
   try {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
+    // Obtener el valor del parámetro id_tipounidad de la URL
+    const id_tipounidad = req.query.typeUnidad;
+
     // Consultar todos los datos de T_Unidad con JOIN en las tablas relacionadas
-    const query = `
+    let query = `
       SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*
       FROM T_Unidad U
       INNER JOIN T_TipoUnidad TU ON U.id_tipounidad = TU.id_tipounidad
       INNER JOIN T_EstadoUnidad EU ON U.id_estadounidad = EU.id_estadounidad
     `;
+
+    // Agregar el filtro de id_tipounidad si se proporciona en la URL
+    if (id_tipounidad) {
+      query += ` WHERE U.id_tipounidad = ${id_tipounidad}`;
+    }
+
     const result = await pool.request().query(query);
 
     // Enviar los datos como respuesta en formato JSON
@@ -280,6 +311,32 @@ router.put("/actualizar-unidad/:id", async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al actualizar los datos de la unidad" });
+  }
+});
+
+router.put("/actualizar-estado-unidad/:id", async (req, res) => {
+  try {
+    const unidadId = req.params.id;
+    const { id_estadounidad } = req.body;
+
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Actualizar el campo id_estadounidad en la tabla T_Unidad
+    const actualizarUnidadQuery = `
+      UPDATE T_Unidad
+      SET id_estadounidad = ${id_estadounidad}
+      WHERE id_unidad = ${unidadId}`;
+    await pool.request().query(actualizarUnidadQuery);
+
+    res
+      .status(200)
+      .json({ message: "Campo id_estadounidad de la unidad actualizado exitosamente" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Error al actualizar el campo id_estadounidad de la unidad" });
   }
 });
 
