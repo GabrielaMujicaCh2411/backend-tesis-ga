@@ -47,23 +47,31 @@ router.post("/register", async (req, res) => {
 
 // Ruta para actualizar datos del cliente
 router.put("/update", async (req, res) => {
-  const { dni, nombres, apellidos, celular, correo, password } = req.body;
-
+  const {
+    idUser,
+    numeroDocumento,
+    nombres,
+    apellidos,
+    celular,
+    email,
+    password,
+  } = req.body;
+  console.log(req.body);
   try {
     const pool = await getConnection.getConnection();
 
     // Paso 1: Actualizar datos del cliente en T_Cliente
     const clienteQuery = `
     UPDATE T_Cliente
-    SET nombres = '${nombres}', apellidos = '${apellidos}', celular = '${celular}', correo = '${correo}'
-    WHERE dni = '${dni}'`;
+    SET nombres = '${nombres}', apellidos = '${apellidos}', celular = '${celular}', correo = '${email}'
+    WHERE id_cliente = '${idUser}'`;
     await pool.request().query(clienteQuery);
 
     // Paso 2: Actualizar contraseña del usuario en T_Usuario
     const actualizarUsuarioQuery = `
     UPDATE T_Usuario
     SET contraseña = '${password}'
-    WHERE dniusuario = '${dni}'`;
+    WHERE dniusuario = '${numeroDocumento}'`;
     await pool.request().query(actualizarUsuarioQuery);
 
     res.status(200).json({ message: "Datos actualizados correctamente" });
