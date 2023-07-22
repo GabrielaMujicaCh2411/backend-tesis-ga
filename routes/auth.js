@@ -56,7 +56,7 @@ router.put("/update", async (req, res) => {
     email,
     password,
   } = req.body;
-  console.log(req.body);
+  console.log('BODYYYY',req.body);
   try {
     const pool = await getConnection.getConnection();
 
