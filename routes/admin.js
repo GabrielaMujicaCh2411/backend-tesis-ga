@@ -341,28 +341,23 @@ router.put("/actualizar-estado-unidad/:id", async (req, res) => {
     // Restar 1 a la cantidad actual
     const cantidadNueva = cantidadActual - 1;
 
-    // Actualizar el campo cantidad y el campo id_estadounidad en la tabla T_Unidad
-    let actualizarUnidadQuery;
-    if (cantidadNueva === 0) {
-      actualizarUnidadQuery = `
+    // Actualizar solo la cantidad si es mayor que 0
+    if (cantidadNueva >= 0) {
+      const actualizarUnidadQuery = `
         UPDATE T_Unidad
-        SET cantidad = ${cantidadNueva},
-        id_estadounidad = 2
+        SET cantidad = ${cantidadNueva}
         WHERE id_unidad = ${unidadId}`;
-    } else if (cantidadNueva > 0) {
-      actualizarUnidadQuery = `
-        UPDATE T_Unidad
-        SET cantidad = ${cantidadNueva},
-        id_estadounidad = ${id_estadounidad}
-        WHERE id_unidad = ${unidadId}`;
-    } else {
-      // Aquí puedes manejar el caso en que la cantidad resultante sea negativa, si lo deseas.
-      return res
-        .status(400)
-        .json({ error: "La cantidad no puede ser negativa" });
+      await pool.request().query(actualizarUnidadQuery);
     }
 
-    await pool.request().query(actualizarUnidadQuery);
+    // Actualizar el estado a 2 si la cantidad es igual a 0
+    if (cantidadNueva === 0) {
+      const actualizarEstadoQuery = `
+        UPDATE T_Unidad
+        SET id_estadounidad = 2
+        WHERE id_unidad = ${unidadId}`;
+      await pool.request().query(actualizarEstadoQuery);
+    }
 
     res.status(200).json({
       message:
