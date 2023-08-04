@@ -210,16 +210,20 @@ router.get("/unidades", async (req, res) => {
 
     // Consultar todos los datos de T_Unidad con JOIN en las tablas relacionadas
     let query = `
-      SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*
+      SELECT TU.nombretipounidad, EU.nombrestadounidad, U.*, C.descripcion as categoria
       FROM T_Unidad U
       INNER JOIN T_TipoUnidad TU ON U.id_tipounidad = TU.id_tipounidad
       INNER JOIN T_EstadoUnidad EU ON U.id_estadounidad = EU.id_estadounidad
+      LEFT JOIN T_Categoria C ON U.id_categoria = C.id_categoria
     `;
 
     // Agregar el filtro de id_tipounidad si se proporciona en la URL
     if (id_tipounidad) {
       query += ` WHERE U.id_tipounidad = ${id_tipounidad}`;
     }
+
+    // Ordenar los resultados por la columna id_categoria
+    query += " ORDER BY U.id_categoria";
 
     const result = await pool.request().query(query);
 
@@ -322,21 +326,54 @@ router.put("/actualizar-estado-unidad/:id", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Actualizar el campo id_estadounidad en la tabla T_Unidad
-    const actualizarUnidadQuery = `
-      UPDATE T_Unidad
-      SET id_estadounidad = ${id_estadounidad}
+    // Obtener la cantidad actual de la unidad
+    const obtenerCantidadQuery = `
+      SELECT cantidad FROM T_Unidad
       WHERE id_unidad = ${unidadId}`;
+    const result = await pool.request().query(obtenerCantidadQuery);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "La unidad no existe" });
+    }
+
+    const cantidadActual = result.recordset[0].cantidad;
+
+    // Restar 1 a la cantidad actual
+    const cantidadNueva = cantidadActual - 1;
+
+    // Actualizar el campo cantidad y el campo id_estadounidad en la tabla T_Unidad
+    let actualizarUnidadQuery;
+    if (cantidadNueva === 0) {
+      actualizarUnidadQuery = `
+        UPDATE T_Unidad
+        SET cantidad = ${cantidadNueva},
+        id_estadounidad = 2
+        WHERE id_unidad = ${unidadId}`;
+    } else if (cantidadNueva > 0) {
+      actualizarUnidadQuery = `
+        UPDATE T_Unidad
+        SET cantidad = ${cantidadNueva},
+        id_estadounidad = ${id_estadounidad}
+        WHERE id_unidad = ${unidadId}`;
+    } else {
+      // Aquí puedes manejar el caso en que la cantidad resultante sea negativa, si lo deseas.
+      return res
+        .status(400)
+        .json({ error: "La cantidad no puede ser negativa" });
+    }
+
     await pool.request().query(actualizarUnidadQuery);
 
-    res
-      .status(200)
-      .json({ message: "Campo id_estadounidad de la unidad actualizado exitosamente" });
+    res.status(200).json({
+      message:
+        "Campo cantidad y id_estadounidad de la unidad actualizados exitosamente",
+    });
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({ error: "Error al actualizar el campo id_estadounidad de la unidad" });
+    res.status(500).json({
+      error:
+        "Error al actualizar la cantidad y el campo id_estadounidad de la unidad",
+    });
   }
 });
 
@@ -581,7 +618,9 @@ router.put("/editar-estado-pedido/:idPedido", async (req, res) => {
       WHERE id_pedido = ${idPedido}`;
     await pool.request().query(editarEstadoPedidoQuery);
 
-    res.status(200).json({ message: "Estado del pedido actualizado exitosamente" });
+    res
+      .status(200)
+      .json({ message: "Estado del pedido actualizado exitosamente" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error al actualizar el estado del pedido" });
@@ -724,7 +763,6 @@ router.get("/pedido/:id", async (req, res) => {
     res.status(500).json({ error: "Error al obtener los datos del pedido" });
   }
 });
-
 
 // Ruta para insertar un nuevo pedido
 router.post("/insertar-pedido", async (req, res) => {
