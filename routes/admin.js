@@ -191,9 +191,7 @@ router.get("/categorias-unidades", async (req, res) => {
     res.status(200).json(estadosTrabajador);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({ error: "Error al obtener las categorias" });
+    res.status(500).json({ error: "Error al obtener las categorias" });
   }
 });
 
@@ -225,8 +223,9 @@ router.get("/unidades", async (req, res) => {
     // Obtener la conexión a la base de datos
     const pool = await getConnection.getConnection();
 
-    // Obtener el valor del parámetro id_tipounidad de la URL
+    // Obtener los valores de los parámetros de consulta
     const id_tipounidad = req.query.typeUnidad;
+    const id_categoria = req.query.categoria;
 
     // Consultar todos los datos de T_Unidad con JOIN en las tablas relacionadas
     let query = `
@@ -237,13 +236,21 @@ router.get("/unidades", async (req, res) => {
       LEFT JOIN T_Categoria C ON U.id_categoria = C.id_categoria
     `;
 
-    // Agregar el filtro de id_tipounidad si se proporciona en la URL
-    if (id_tipounidad) {
-      query += ` WHERE U.id_tipounidad = ${id_tipounidad}`;
+    // Agregar los filtros si se proporcionan en la URL
+    if (id_tipounidad || id_categoria) {
+      query += " WHERE";
+      if (id_tipounidad) {
+        query += ` U.id_tipounidad = ${id_tipounidad}`;
+        if (id_categoria) {
+          query += " AND";
+        }
+      }
+      if (id_categoria) {
+        query += ` U.id_categoria = ${id_categoria}`;
+      }
     }
 
-    // Ordenar los resultados por la columna id_categoria
-    query += " ORDER BY U.id_categoria";
+    // No es necesario ordenar por id_categoria, ya que cada categoría tiene un código diferente
 
     const result = await pool.request().query(query);
 
