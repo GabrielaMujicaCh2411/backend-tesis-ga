@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  const { dni, nombres, apellidos, celular, correo, password } = req.body;
+  const { dni, nombres, apellidos, celular, correo, password, id_rol } = req.body;
 
   try {
     const pool = await getConnection.getConnection();
@@ -30,7 +30,7 @@ router.post("/register", async (req, res) => {
     console.log("ID de creación:", idCliente);
 
     const registrarUsuarioQuery = `INSERT INTO T_Usuario (dniusuario, contraseña, id_rol, id_cliente) 
-    VALUES ('${dni}', '${password}', 1, ${idCliente})`;
+    VALUES ('${dni}', '${password}', ${id_rol}, ${idCliente})`;
     await pool.request().query(registrarUsuarioQuery);
 
     // Paso 4: Consultar todos los usuarios
