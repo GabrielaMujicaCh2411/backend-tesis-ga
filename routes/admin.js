@@ -177,6 +177,26 @@ router.get("/estados-trabajador", async (req, res) => {
   }
 });
 
+router.get("/categorias-unidades", async (req, res) => {
+  try {
+    // Obtener la conexión a la base de datos
+    const pool = await getConnection.getConnection();
+
+    // Consultar los estados de trabajador en la tabla T_EstadoTrabajador
+    const obtenerEstadosTrabajadorQuery = "SELECT * FROM T_Categoria";
+    const result = await pool.request().query(obtenerEstadosTrabajadorQuery);
+
+    // Enviar los datos de los estados de trabajador como respuesta en formato JSON
+    const estadosTrabajador = result.recordset;
+    res.status(200).json(estadosTrabajador);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener las categorias" });
+  }
+});
+
 // Ruta para obtener todos los datos
 // router.get("/unidades", async (req, res) => {
 //   try {
